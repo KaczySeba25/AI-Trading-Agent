@@ -26,6 +26,7 @@ Initial autonomous trading scaffold is implemented without requiring private API
 ```powershell
 .venv\Scripts\python.exe -m pytest -q
 .venv\Scripts\python.exe -m compileall -q agent_system
+.venv\Scripts\python.exe scripts\check_no_secrets.py
 ```
 
 ## Execution Safety
