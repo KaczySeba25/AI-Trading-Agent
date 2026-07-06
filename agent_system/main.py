@@ -8,6 +8,7 @@ import asyncio
 from agent_system.data.binance_ws import run_phase_one
 from agent_system.environment.backtester import run_public_history_training_and_backtest
 from agent_system.runner import run_paper_loop
+from agent_system.rl.history_trainer import PublicHistoryTrainer
 from agent_system.rl.online_loop import OnlineLearningLoop
 from agent_system.rl.trainer import train_ppo
 from agent_system.system import TradingSystem, synthetic_ticks
@@ -25,6 +26,7 @@ def main() -> None:
             "live-paper",
             "paper-loop",
             "public-history-train",
+            "history-learning-loop",
         ],
         default="stream",
     )
@@ -87,6 +89,17 @@ def main() -> None:
                 limit=args.limit,
                 train_steps=args.train_steps,
                 online_cycle=args.online_cycle,
+            )
+        )
+        return
+
+    if args.mode == "history-learning-loop":
+        print(
+            PublicHistoryTrainer().run(
+                interval=args.interval,
+                limit=args.limit,
+                cycles=args.cycles,
+                train_steps=args.train_steps,
             )
         )
         return
