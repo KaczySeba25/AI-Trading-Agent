@@ -1,6 +1,10 @@
-# Autonomous Trading Agent
+# AI Trading Agent
 
-Phase-driven crypto trading agent scaffold.
+Autonomous RL-based cryptocurrency trading system.
+
+## Status
+
+Initial autonomous trading scaffold is implemented without requiring private API credentials.
 
 ## Current Modes
 
