@@ -17,10 +17,16 @@ class RiskDecision:
 
 
 class RiskManager:
-    def __init__(self, config: Settings = settings, starting_equity: float = 10_000.0) -> None:
+    def __init__(
+        self,
+        config: Settings = settings,
+        starting_equity: float | None = None,
+    ) -> None:
         self.config = config
-        self.starting_equity = starting_equity
+        self.starting_equity = starting_equity or config.initial_capital
         self.current_equity = starting_equity
+        if self.current_equity is None:
+            self.current_equity = config.initial_capital
         self.kill_switch_enabled = False
 
     def enable_kill_switch(self) -> None:
@@ -54,6 +60,11 @@ class RiskManager:
         notional = self.current_equity * self.config.max_position_fraction
         quantity = notional / price
         return RiskDecision(True, "allowed", quantity=quantity, leverage=leverage)
+
+    def assess_position_capacity(self, open_positions_count: int) -> RiskDecision:
+        if open_positions_count >= self.config.max_open_positions:
+            return RiskDecision(False, "max_open_positions_reached")
+        return RiskDecision(True, "allowed")
 
     def should_stop_loss(self, position: LivePosition, mark_price: float) -> bool:
         if not position.is_open or position.entry_price <= 0:

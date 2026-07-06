@@ -15,11 +15,14 @@ Initial autonomous trading scaffold is implemented without requiring private API
 .venv\Scripts\python.exe -m agent_system.main --mode paper-smoke
 .venv\Scripts\python.exe -m agent_system.main --mode live-paper --min-ticks 120 --timeout-seconds 45
 .venv\Scripts\python.exe -m agent_system.main --mode paper-loop --cycles 0 --min-ticks 120 --timeout-seconds 45 --sleep-seconds 10
+.venv\Scripts\python.exe -m agent_system.main --mode public-history-train --interval 1m --limit 500 --train-steps 1024
+.venv\Scripts\python.exe -m agent_system.main --mode public-history-train --interval 1m --limit 500 --train-steps 1024 --online-cycle
 ```
 
 `stream` connects to public Binance WebSocket market data. Execution modules use Binance Futures Testnet credentials from environment variables and do not print secrets.
 `live-paper` collects live public market data, runs the PPO policy through simulated execution, and writes a report without sending any real order.
 `paper-loop` repeats live paper cycles. `--cycles 0` means run continuously.
+`public-history-train` downloads public Binance BTCUSDT klines, trains PPO, and writes paper replay reports. Add `--online-cycle` when you want the heavier candidate/rollback learning cycle too.
 
 ## Validation
 
@@ -43,6 +46,9 @@ No private credentials are required for this validation. Private Testnet credent
 ## Environment Variables
 
 - `TRADING_SYMBOL`, default `BTCUSDT`
+- `INITIAL_CAPITAL`, default `500`
+- `MAX_OPEN_POSITIONS`, default `8`
+- `PUBLIC_MARKET_DATA_BASE_URL`, default `https://api.binance.com`
 - `BINANCE_API_KEY`
 - `BINANCE_API_SECRET`
 - `BINANCE_TESTNET_BASE_URL`, default `https://testnet.binancefuture.com`

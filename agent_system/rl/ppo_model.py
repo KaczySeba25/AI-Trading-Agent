@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -66,8 +67,12 @@ def build_ppo_model(env: gym.Env, tensorboard_log: str | None = "logs/ppo") -> P
 
 
 def save_checkpoint(model: PPO, path: str | Path) -> None:
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
-    model.save(str(path))
+    requested_path = Path(path)
+    final_path = requested_path if requested_path.suffix == ".zip" else requested_path.with_suffix(".zip")
+    final_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = final_path.with_name(f"{final_path.stem}.tmp{final_path.suffix}")
+    model.save(str(temp_path))
+    shutil.move(str(temp_path), str(final_path))
 
 
 def load_checkpoint(path: str | Path, env: gym.Env | None = None) -> PPO:

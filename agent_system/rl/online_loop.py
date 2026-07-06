@@ -12,7 +12,7 @@ from stable_baselines3 import PPO
 from agent_system.data.data_buffer import MarketTick
 from agent_system.environment.trading_env import TradingAction
 from agent_system.monitoring.metrics import summarize_performance
-from agent_system.rl.ppo_model import GymTradingEnv, build_ppo_model
+from agent_system.rl.ppo_model import GymTradingEnv, build_ppo_model, save_checkpoint
 
 
 class OnlineLearningLoop:
@@ -53,7 +53,7 @@ class OnlineLearningLoop:
             model = build_ppo_model(env, tensorboard_log=str(self.log_dir))
 
         model.learn(total_timesteps=train_steps)
-        model.save(str(candidate_path))
+        save_checkpoint(model, candidate_path)
 
         candidate_score = self._evaluate(candidate_path, GymTradingEnv(selected_ticks))
         improved = baseline_score is None or candidate_score["equity"] >= baseline_score["equity"]

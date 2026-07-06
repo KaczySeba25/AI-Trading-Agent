@@ -33,6 +33,12 @@ class OrderManager:
         if self.position_tracker.get_position(self.config.symbol):
             return {"status": "rejected", "reason": "position_already_open"}
 
+        capacity = self.risk_manager.assess_position_capacity(
+            self.position_tracker.open_positions_count()
+        )
+        if not capacity.allowed:
+            return {"status": "rejected", "reason": capacity.reason}
+
         decision = self.risk_manager.assess_entry(limit_price)
         if not decision.allowed:
             return {"status": "rejected", "reason": decision.reason}

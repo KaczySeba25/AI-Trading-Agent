@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import sys
+import os
 from pathlib import Path
 
 
@@ -21,12 +22,10 @@ PATTERNS = [
 
 def iter_files() -> list[Path]:
     files: list[Path] = []
-    for path in ROOT.rglob("*"):
-        if not path.is_file():
-            continue
-        if any(part in IGNORED_DIRS for part in path.relative_to(ROOT).parts):
-            continue
-        files.append(path)
+    for directory, dirs, names in os.walk(ROOT):
+        dirs[:] = [name for name in dirs if name not in IGNORED_DIRS]
+        for name in names:
+            files.append(Path(directory) / name)
     return files
 
 

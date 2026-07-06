@@ -30,14 +30,14 @@ def train_ppo(
     model.learn(total_timesteps=total_timesteps)
     elapsed = time.time() - started
 
-    checkpoint_path = Path(model_dir) / "ppo_latest"
+    checkpoint_path = Path(model_dir) / "ppo_latest.zip"
     save_checkpoint(model, checkpoint_path)
 
     result: dict[str, str | int | float] = {
         "status": "trained",
         "total_timesteps": total_timesteps,
         "elapsed_seconds": round(elapsed, 3),
-        "checkpoint": str(checkpoint_path.with_suffix(".zip")),
+        "checkpoint": str(checkpoint_path),
     }
     report_path = Path(log_dir) / "training_summary.json"
     report_path.write_text(json.dumps(result, indent=2), encoding="utf-8")

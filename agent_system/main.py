@@ -6,6 +6,7 @@ import argparse
 import asyncio
 
 from agent_system.data.binance_ws import run_phase_one
+from agent_system.environment.backtester import run_public_history_training_and_backtest
 from agent_system.runner import run_paper_loop
 from agent_system.rl.online_loop import OnlineLearningLoop
 from agent_system.rl.trainer import train_ppo
@@ -23,6 +24,7 @@ def main() -> None:
             "paper-smoke",
             "live-paper",
             "paper-loop",
+            "public-history-train",
         ],
         default="stream",
     )
@@ -30,6 +32,10 @@ def main() -> None:
     parser.add_argument("--timeout-seconds", type=float, default=45.0)
     parser.add_argument("--cycles", type=int, default=1)
     parser.add_argument("--sleep-seconds", type=float, default=10.0)
+    parser.add_argument("--interval", default="1m")
+    parser.add_argument("--limit", type=int, default=500)
+    parser.add_argument("--train-steps", type=int, default=1024)
+    parser.add_argument("--online-cycle", action="store_true")
     args = parser.parse_args()
 
     if args.mode == "stream":
@@ -70,6 +76,17 @@ def main() -> None:
                     timeout_seconds=args.timeout_seconds,
                     sleep_seconds=args.sleep_seconds,
                 )
+            )
+        )
+        return
+
+    if args.mode == "public-history-train":
+        print(
+            run_public_history_training_and_backtest(
+                interval=args.interval,
+                limit=args.limit,
+                train_steps=args.train_steps,
+                online_cycle=args.online_cycle,
             )
         )
         return

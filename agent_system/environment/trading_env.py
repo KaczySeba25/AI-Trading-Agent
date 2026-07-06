@@ -8,6 +8,7 @@ from enum import IntEnum
 from agent_system.data.data_buffer import MarketTick
 from agent_system.data.feature_engineering import FeatureEngine
 from agent_system.environment.reward import calculate_reward
+from agent_system.core.config import settings
 
 
 class TradingAction(IntEnum):
@@ -34,7 +35,7 @@ class TradingEnvironment:
     def __init__(
         self,
         ticks: list[MarketTick],
-        initial_balance: float = 10_000.0,
+        initial_balance: float = settings.initial_capital,
         fee_rate: float = 0.0004,
         slippage_rate: float = 0.0002,
         position_fraction: float = 0.02,

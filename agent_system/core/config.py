@@ -9,6 +9,12 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Settings:
     symbol: str = os.getenv("TRADING_SYMBOL", "BTCUSDT").upper()
+    initial_capital: float = float(os.getenv("INITIAL_CAPITAL", "500"))
+    max_open_positions: int = int(os.getenv("MAX_OPEN_POSITIONS", "8"))
+    public_market_data_base_url: str = os.getenv(
+        "PUBLIC_MARKET_DATA_BASE_URL",
+        "https://api.binance.com",
+    )
     binance_ws_base_url: str = os.getenv(
         "BINANCE_WS_BASE_URL",
         "wss://stream.binance.com:9443/stream",

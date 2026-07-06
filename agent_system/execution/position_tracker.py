@@ -29,3 +29,9 @@ class PositionTracker:
 
     def get_position(self, symbol: str) -> LivePosition | None:
         return self._positions.get(symbol)
+
+    def open_positions_count(self) -> int:
+        return sum(1 for position in self._positions.values() if position.is_open)
+
+    def all_positions(self) -> list[LivePosition]:
+        return list(self._positions.values())
