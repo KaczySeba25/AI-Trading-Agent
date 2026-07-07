@@ -5,14 +5,6 @@ from __future__ import annotations
 import argparse
 import asyncio
 
-from agent_system.data.binance_ws import run_phase_one
-from agent_system.environment.backtester import run_public_history_training_and_backtest
-from agent_system.runner import run_paper_loop
-from agent_system.rl.history_trainer import PublicHistoryTrainer
-from agent_system.rl.online_loop import OnlineLearningLoop
-from agent_system.rl.trainer import train_ppo
-from agent_system.system import TradingSystem, synthetic_ticks
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Autonomous trading agent")
@@ -27,6 +19,7 @@ def main() -> None:
             "paper-loop",
             "public-history-train",
             "history-learning-loop",
+            "testnet-diagnostic",
         ],
         default="stream",
     )
@@ -41,23 +34,37 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.mode == "stream":
+        from agent_system.data.binance_ws import run_phase_one
+
         asyncio.run(run_phase_one())
         return
 
-    ticks = synthetic_ticks()
     if args.mode == "train-smoke":
+        from agent_system.rl.trainer import train_ppo
+        from agent_system.system import synthetic_ticks
+
+        ticks = synthetic_ticks()
         print(train_ppo(ticks, total_timesteps=256))
         return
 
     if args.mode == "online-smoke":
+        from agent_system.rl.online_loop import OnlineLearningLoop
+        from agent_system.system import synthetic_ticks
+
+        ticks = synthetic_ticks()
         print(OnlineLearningLoop().run_cycle(ticks, collect_steps=400, train_steps=256))
         return
 
     if args.mode == "paper-smoke":
+        from agent_system.system import TradingSystem, synthetic_ticks
+
+        ticks = synthetic_ticks()
         print(TradingSystem().run_paper_replay(ticks))
         return
 
     if args.mode == "live-paper":
+        from agent_system.system import TradingSystem
+
         print(
             asyncio.run(
                 TradingSystem().run_live_paper(
@@ -69,6 +76,8 @@ def main() -> None:
         return
 
     if args.mode == "paper-loop":
+        from agent_system.runner import run_paper_loop
+
         cycles = args.cycles if args.cycles > 0 else None
         print(
             asyncio.run(
@@ -83,6 +92,10 @@ def main() -> None:
         return
 
     if args.mode == "public-history-train":
+        from agent_system.environment.backtester import (
+            run_public_history_training_and_backtest,
+        )
+
         print(
             run_public_history_training_and_backtest(
                 interval=args.interval,
@@ -94,6 +107,8 @@ def main() -> None:
         return
 
     if args.mode == "history-learning-loop":
+        from agent_system.rl.history_trainer import PublicHistoryTrainer
+
         print(
             PublicHistoryTrainer().run(
                 interval=args.interval,
@@ -102,6 +117,12 @@ def main() -> None:
                 train_steps=args.train_steps,
             )
         )
+        return
+
+    if args.mode == "testnet-diagnostic":
+        from agent_system.execution.diagnostics import run_testnet_diagnostic
+
+        print(run_testnet_diagnostic())
         return
 
 

@@ -4,6 +4,14 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(ROOT_DIR / ".env")
+load_dotenv(ROOT_DIR / ".env.local", override=True)
 
 
 @dataclass(frozen=True)
@@ -35,6 +43,9 @@ class Settings:
     )
     binance_api_key: str | None = os.getenv("BINANCE_API_KEY")
     binance_api_secret: str | None = os.getenv("BINANCE_API_SECRET")
+    enable_testnet_trading: bool = (
+        os.getenv("ENABLE_TESTNET_TRADING", "false").lower() == "true"
+    )
     max_position_fraction: float = float(os.getenv("MAX_POSITION_FRACTION", "0.02"))
     default_leverage: int = int(os.getenv("DEFAULT_LEVERAGE", "3"))
     max_leverage: int = int(os.getenv("MAX_LEVERAGE", "5"))

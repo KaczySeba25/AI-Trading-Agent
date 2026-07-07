@@ -80,3 +80,19 @@ class BinanceTestnetClient:
 
     def place_order(self, params: dict[str, Any]) -> dict[str, Any]:
         return self.signed_request("POST", "/fapi/v1/order", params)
+
+    def account(self) -> dict[str, Any]:
+        return self.signed_request("GET", "/fapi/v2/account")
+
+    def balance(self) -> list[dict[str, Any]]:
+        response = self.signed_request("GET", "/fapi/v2/balance")
+        if not isinstance(response, list):
+            raise TradingAgentError("Unexpected Binance balance response")
+        return response
+
+    def open_orders(self, symbol: str | None = None) -> list[dict[str, Any]]:
+        params = {"symbol": symbol} if symbol else None
+        response = self.signed_request("GET", "/fapi/v1/openOrders", params)
+        if not isinstance(response, list):
+            raise TradingAgentError("Unexpected Binance openOrders response")
+        return response

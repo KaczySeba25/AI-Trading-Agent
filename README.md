@@ -18,6 +18,7 @@ Initial autonomous trading scaffold is implemented without requiring private API
 .venv\Scripts\python.exe -m agent_system.main --mode public-history-train --interval 1m --limit 500 --train-steps 1024
 .venv\Scripts\python.exe -m agent_system.main --mode public-history-train --interval 1m --limit 500 --train-steps 1024 --online-cycle
 .venv\Scripts\python.exe -m agent_system.main --mode history-learning-loop --interval 1m --limit 500 --cycles 3 --train-steps 1024
+.venv\Scripts\python.exe -m agent_system.main --mode testnet-diagnostic
 ```
 
 `stream` connects to public Binance WebSocket market data. Execution modules use Binance Futures Testnet credentials from environment variables and do not print secrets.
@@ -25,6 +26,7 @@ Initial autonomous trading scaffold is implemented without requiring private API
 `paper-loop` repeats live paper cycles. `--cycles 0` means run continuously.
 `public-history-train` downloads public Binance BTCUSDT klines, trains PPO, and writes paper replay reports. Add `--online-cycle` when you want the heavier candidate/rollback learning cycle too.
 `history-learning-loop` repeats public-history training cycles, evaluates each model, and promotes only candidates that pass basic trade/drawdown/equity gates.
+`testnet-diagnostic` validates Binance Futures Testnet credentials and account read access without submitting orders.
 
 ## Validation
 
@@ -53,6 +55,7 @@ No private credentials are required for this validation. Private Testnet credent
 - `PUBLIC_MARKET_DATA_BASE_URL`, default `https://api.binance.com`
 - `BINANCE_API_KEY`
 - `BINANCE_API_SECRET`
+- `ENABLE_TESTNET_TRADING`, default `false`
 - `BINANCE_TESTNET_BASE_URL`, default `https://testnet.binancefuture.com`
 - `MAX_POSITION_FRACTION`, default `0.02`
 - `DEFAULT_LEVERAGE`, default `3`
