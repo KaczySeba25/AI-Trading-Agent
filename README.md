@@ -18,6 +18,7 @@ Initial autonomous trading scaffold is implemented without requiring private API
 .venv\Scripts\python.exe -m agent_system.main --mode public-history-train --interval 1m --limit 500 --train-steps 1024
 .venv\Scripts\python.exe -m agent_system.main --mode public-history-train --interval 1m --limit 500 --train-steps 1024 --online-cycle
 .venv\Scripts\python.exe -m agent_system.main --mode history-learning-loop --interval 1m --limit 500 --cycles 3 --train-steps 1024
+.venv\Scripts\python.exe -m agent_system.main --mode autonomous-learning-loop --interval 1m --days 365 --max-rows 50000 --cycles 0 --history-cycles 3 --train-steps 2048 --min-ticks 120 --timeout-seconds 60 --sleep-seconds 300
 .venv\Scripts\python.exe -m agent_system.main --mode testnet-diagnostic
 ```
 
@@ -26,6 +27,7 @@ Initial autonomous trading scaffold is implemented without requiring private API
 `paper-loop` repeats live paper cycles. `--cycles 0` means run continuously.
 `public-history-train` downloads public Binance BTCUSDT klines, trains PPO, and writes paper replay reports. Add `--online-cycle` when you want the heavier candidate/rollback learning cycle too.
 `history-learning-loop` repeats public-history training cycles, evaluates each model, and promotes only candidates that pass basic trade/drawdown/equity gates.
+`autonomous-learning-loop` runs continuous public-history learning plus live paper checks. `--cycles 0` means run continuously.
 `testnet-diagnostic` validates Binance Futures Testnet credentials and account read access without submitting orders.
 
 ## Validation

@@ -20,6 +20,7 @@ def main() -> None:
             "public-history-train",
             "history-learning-loop",
             "testnet-diagnostic",
+            "autonomous-learning-loop",
         ],
         default="stream",
     )
@@ -29,8 +30,11 @@ def main() -> None:
     parser.add_argument("--sleep-seconds", type=float, default=10.0)
     parser.add_argument("--interval", default="1m")
     parser.add_argument("--limit", type=int, default=500)
+    parser.add_argument("--days", type=int, default=365)
+    parser.add_argument("--max-rows", type=int, default=0)
     parser.add_argument("--train-steps", type=int, default=1024)
     parser.add_argument("--online-cycle", action="store_true")
+    parser.add_argument("--history-cycles", type=int, default=3)
     args = parser.parse_args()
 
     if args.mode == "stream":
@@ -113,6 +117,8 @@ def main() -> None:
             PublicHistoryTrainer().run(
                 interval=args.interval,
                 limit=args.limit,
+                days=args.days,
+                max_rows=args.max_rows or None,
                 cycles=args.cycles,
                 train_steps=args.train_steps,
             )
@@ -123,6 +129,27 @@ def main() -> None:
         from agent_system.execution.diagnostics import run_testnet_diagnostic
 
         print(run_testnet_diagnostic())
+        return
+
+    if args.mode == "autonomous-learning-loop":
+        from agent_system.runner import run_autonomous_learning_loop
+
+        cycles = args.cycles if args.cycles > 0 else None
+        print(
+            asyncio.run(
+                run_autonomous_learning_loop(
+                    cycles=cycles,
+                    interval=args.interval,
+                    days=args.days,
+                    max_rows=args.max_rows or None,
+                    history_cycles=args.history_cycles,
+                    train_steps=args.train_steps,
+                    live_min_ticks=args.min_ticks,
+                    live_timeout_seconds=args.timeout_seconds,
+                    sleep_seconds=args.sleep_seconds,
+                )
+            )
+        )
         return
 
 
