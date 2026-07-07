@@ -56,6 +56,16 @@ No private credentials are required for this validation. Private Testnet credent
 - `BINANCE_API_KEY`
 - `BINANCE_API_SECRET`
 - `ENABLE_TESTNET_TRADING`, default `false`
+
+## Local Binance Setup
+
+Use the interactive local setup script. It writes secrets only to `.env.local`, which is ignored by git, and runs a read-only Testnet diagnostic.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\setup_local_binance.ps1
+```
+
+The script keeps `ENABLE_TESTNET_TRADING=false`, so it does not submit orders.
 - `BINANCE_TESTNET_BASE_URL`, default `https://testnet.binancefuture.com`
 - `MAX_POSITION_FRACTION`, default `0.02`
 - `DEFAULT_LEVERAGE`, default `3`
