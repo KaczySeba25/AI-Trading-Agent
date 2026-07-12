@@ -1,4 +1,10 @@
-"""Real-time market feature engineering."""
+"""Real-time market feature engineering.
+
+Extended with three additional indicators:
+  - Order Flow Imbalance (OFI): directional trade pressure from bid/ask changes
+  - Garman-Klass Volatility (GK): high-low range volatility estimator
+  - Fisher Transform: price-normalised oscillator sharpening reversal signals
+"""
 
 from __future__ import annotations
 
@@ -10,6 +16,7 @@ from agent_system.data.data_buffer import MarketTick
 
 @dataclass(frozen=True)
 class MarketFeatures:
+    # --- Original 14 features ---
     return_1s: float
     return_5s: float
     return_10s: float
@@ -24,6 +31,10 @@ class MarketFeatures:
     bollinger_position: float
     volume_zscore: float
     candle_momentum: float
+    # --- 3 new features ---
+    ofi: float                  # Order Flow Imbalance
+    gk_volatility: float        # Garman-Klass Volatility
+    fisher_transform: float     # Fisher Transform oscillator
 
     def as_vector(self) -> list[float]:
         return [
@@ -41,6 +52,9 @@ class MarketFeatures:
             self.bollinger_position,
             self.volume_zscore,
             self.candle_momentum,
+            self.ofi,
+            self.gk_volatility,
+            self.fisher_transform,
         ]
 
     def as_dict(self) -> dict[str, float]:
@@ -59,7 +73,14 @@ class MarketFeatures:
             "bollinger_position": self.bollinger_position,
             "volume_zscore": self.volume_zscore,
             "candle_momentum": self.candle_momentum,
+            "ofi": self.ofi,
+            "gk_volatility": self.gk_volatility,
+            "fisher_transform": self.fisher_transform,
         }
+
+
+# Total feature count — used by GymTradingEnv observation_space
+FEATURE_COUNT = 17
 
 
 class FeatureEngine:
@@ -91,6 +112,9 @@ class FeatureEngine:
             bollinger_position=self._bollinger_position(prices, period=20),
             volume_zscore=self._zscore(volumes),
             candle_momentum=self._candle_momentum(prices, lookback=20),
+            ofi=self._order_flow_imbalance(ticks),
+            gk_volatility=self._garman_klass_volatility(prices, period=20),
+            fisher_transform=self._fisher_transform(prices, period=10),
         )
 
     @staticmethod
@@ -110,7 +134,14 @@ class FeatureEngine:
             bollinger_position=0.0,
             volume_zscore=0.0,
             candle_momentum=0.0,
+            ofi=0.0,
+            gk_volatility=0.0,
+            fisher_transform=0.0,
         )
+
+    # ------------------------------------------------------------------
+    # Original helpers
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _return_since(ticks: list[MarketTick], target_timestamp: int) -> float:
@@ -238,3 +269,90 @@ class FeatureEngine:
         if len(prices) <= lookback or prices[-lookback] == 0:
             return 0.0
         return (prices[-1] - prices[-lookback]) / prices[-lookback]
+
+    # ------------------------------------------------------------------
+    # NEW FEATURES
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _order_flow_imbalance(ticks: list[MarketTick], lookback: int = 20) -> float:
+        """Order Flow Imbalance (OFI).
+
+        Measures directional pressure by comparing consecutive bid/ask changes.
+        Positive OFI  => buying pressure dominant.
+        Negative OFI  => selling pressure dominant.
+        Result is normalised by total activity to stay in [-1, 1].
+        """
+        window = ticks[-lookback - 1:] if len(ticks) > lookback else ticks
+        if len(window) < 2:
+            return 0.0
+
+        buy_pressure = 0.0
+        sell_pressure = 0.0
+        for prev, curr in zip(window, window[1:]):
+            # Bid increased  => aggressive buyer arrived
+            if curr.bid >= prev.bid:
+                buy_pressure += curr.volume
+            # Ask decreased  => aggressive seller arrived
+            if curr.ask <= prev.ask:
+                sell_pressure += curr.volume
+
+        total = buy_pressure + sell_pressure
+        if total == 0.0:
+            return 0.0
+        return (buy_pressure - sell_pressure) / total
+
+    @staticmethod
+    def _garman_klass_volatility(prices: list[float], period: int = 20) -> float:
+        """Garman-Klass Volatility estimator.
+
+        Uses rolling High/Low approximation from the tick prices.
+        GK is more efficient than close-to-close std because it
+        incorporates the intra-period range.
+        Result is normalised (annualised-like factor removed) so it
+        lives on the same scale as the existing `volatility` feature.
+        """
+        window = prices[-period:] if len(prices) >= period else prices
+        if len(window) < 2:
+            return 0.0
+
+        # Approximate OHLC from sequential ticks
+        high = max(window)
+        low = min(window)
+        open_price = window[0]
+        close_price = window[-1]
+
+        if open_price <= 0 or low <= 0:
+            return 0.0
+
+        log_hl = math.log(high / low) if low > 0 else 0.0
+        log_co = math.log(close_price / open_price) if open_price > 0 else 0.0
+
+        gk = 0.5 * (log_hl ** 2) - (2.0 * math.log(2.0) - 1.0) * (log_co ** 2)
+        return math.sqrt(max(gk, 0.0))
+
+    @classmethod
+    def _fisher_transform(cls, prices: list[float], period: int = 10) -> float:
+        """Fisher Transform.
+
+        Converts prices to a Gaussian normal distribution, sharpening
+        overbought/oversold turning points.  Output range is roughly
+        (-3, +3); clipped to (-2.99, 2.99) to avoid log(0).
+        """
+        window = prices[-period:] if len(prices) >= period else prices
+        if len(window) < 2:
+            return 0.0
+
+        highest = max(window)
+        lowest = min(window)
+        price_range = highest - lowest
+
+        if price_range == 0.0:
+            return 0.0
+
+        # Normalise latest price to (-1, 1)
+        raw = 2.0 * ((prices[-1] - lowest) / price_range) - 1.0
+        # Clip strictly inside (-1, 1) to keep log finite
+        raw = max(-0.999, min(0.999, raw))
+
+        return 0.5 * math.log((1.0 + raw) / (1.0 - raw))
