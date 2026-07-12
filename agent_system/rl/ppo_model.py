@@ -14,6 +14,7 @@ from gymnasium import spaces
 from stable_baselines3 import PPO
 
 from agent_system.data.data_buffer import MarketTick
+from agent_system.data.feature_engineering import FEATURE_COUNT
 from agent_system.environment.trading_env import TradingEnvironment
 
 
@@ -24,10 +25,12 @@ class GymTradingEnv(gym.Env):
         super().__init__()
         self.env = TradingEnvironment(ticks)
         self.action_space = spaces.Discrete(4)
+        # observation_space uses FEATURE_COUNT so it auto-updates
+        # whenever new features are added to FeatureEngine
         self.observation_space = spaces.Box(
             low=-np.inf,
             high=np.inf,
-            shape=(14,),
+            shape=(FEATURE_COUNT,),
             dtype=np.float32,
         )
 
