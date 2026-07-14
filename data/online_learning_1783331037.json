@@ -1,0 +1,38 @@
+{
+  "timestamp": 1783331037,
+  "collect_steps": 400,
+  "train_steps": 256,
+  "baseline": {
+    "equity": 10000.0,
+    "trades": 0,
+    "metrics": {
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "drawdown": 0.0,
+      "sharpe_ratio": 0.0
+    },
+    "last_action_space": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "candidate": {
+    "equity": 10005.281912692088,
+    "trades": 0,
+    "metrics": {
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "drawdown": 0.00046053982462988157,
+      "sharpe_ratio": 0.3194547597649523
+    },
+    "last_action_space": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "decision": "replace_model"
+}
