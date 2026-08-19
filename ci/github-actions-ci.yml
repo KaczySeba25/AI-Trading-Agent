@@ -1,0 +1,50 @@
+# Copy this file to .github/workflows/ci.yml to enable it.
+# It lives here because the agent that generated it cannot write to
+# .github/workflows/ without elevated GitHub App permissions -- see ci/README.md.
+
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        # The RL extras (torch) are ~800 MB. The suite is written to pass
+        # without them, so CI installs the light set and exercises the
+        # heuristic fallback path.
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy requests websockets python-dotenv pytest ruff
+
+      - name: Check for committed secrets
+        run: python scripts/check_no_secrets.py
+
+      - name: Lint
+        run: ruff check agent_system scripts tests
+        continue-on-error: true
+
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Smoke-test the CLI offline
+        # Regenerates sample data and runs a short paper session end to end.
+        # Catches import errors and CLI regressions the unit tests would miss.
+        run: |
+          python scripts/generate_sample_data.py --rows 1500
+          python -m agent_system.main --mode backtest --csv data/BTCUSDT.csv
+          python -m agent_system.main --mode paper --csv data/BTCUSDT.csv --steps 200
