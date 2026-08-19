@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments (never commit these)
+.venv/
+venv/
+env/
+Scripts/
+bin/
+Include/
+include/
+Lib/
+lib/
+lib64/
+share/
+pyvenv.cfg
+
+# Secrets
+.env
+.env.local
+*.key
+*.pem
+
+# Runtime artefacts
+logs/
+state/
+models/
+runs/
+data/*.json
+data/live_paper_*.json
+data/online_learning_*.json
+!data/BTCUSDT.csv
+!data/fixtures/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
