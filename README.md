@@ -123,6 +123,10 @@ Steps 3 and 4 are your decision. The agent will never enable them on its own.
 .venv/bin/python scripts/check_no_secrets.py
 ```
 
+A GitHub Actions workflow running all three on Python 3.11 and 3.12 is provided in
+[`ci/github-actions-ci.yml`](ci/github-actions-ci.yml); see [`ci/README.md`](ci/README.md)
+for the one-line command that activates it.
+
 ## Environment variables
 
 See [`.env.example`](.env.example) for the full annotated list. Secrets belong in
