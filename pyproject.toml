@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-trading-agent"
+version = "0.1.0"
+description = "Autonomous RL-based cryptocurrency trading system"
+requires-python = ">=3.11"
+dependencies = [
+    "websockets>=12.0,<17.0",
+    "numpy>=1.26,<3.0",
+    "gymnasium>=0.29,<1.3",
+    "stable-baselines3>=2.3,<3.0",
+    "tensorboard>=2.16,<3.0",
+    "requests>=2.31,<3.0",
+    "pytest>=8.0,<9.0",
+    "python-dotenv>=1.0,<2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
