@@ -1,0 +1,26 @@
+{
+  "timestamp": 1783331394,
+  "mode": "live_paper",
+  "ticks": 33,
+  "actions": {
+    "hold": 0,
+    "long": 33,
+    "short": 0,
+    "close": 0
+  },
+  "total_reward": -0.1131620354981283,
+  "final_info": {
+    "balance": 9999.92,
+    "equity": 9999.865068982252,
+    "realized_pnl": 0.0,
+    "unrealized_pnl": -0.0549310177490641,
+    "position_side": 1.0
+  },
+  "stream_stats": {
+    "messages_received": 62,
+    "ticks_emitted": 33,
+    "malformed_messages": 0,
+    "reconnects": 0,
+    "avg_latency_ms": 114.27272727272727
+  }
+}
